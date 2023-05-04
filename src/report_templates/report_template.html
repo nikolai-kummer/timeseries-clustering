@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clustering Report</title>
+</head>
+<body>
+<h1>Initial Sample Data</h1>
+<p>Total samples: {{ initial_sample_data.total_samples }}</p> <!-- Add this line to display the total number of samples -->
+
+<h3>Sample Plots for dataset traces</h3>
+{% for base64_image in initial_sample_data.initial_sample_plots %}
+    <img src="data:image/png;base64,{{ base64_image }}" alt="Initial Sample Plot">
+{% endfor %}
+<hr>
+
+
+
+{% for clustering_algorithm_data in clustering_algorithms %}
+<hr>
+    <h2>{{ clustering_algorithm_data.name }} Clustering Algorithm</h2>
+
+    <h3>{{ clustering_algorithm_data.name }} PCA Plot</h3>
+    <img src="data:image/png;base64,{{ clustering_algorithm_data.pca_base64_image }}" alt="{{ clustering_algorithm_data.name }} PCA Plot">
+    <h3>Cluster Assignments</h3>
+    <pre>{{ clustering_algorithm_data.cluster_assignments }}</pre>
+
+    <h3>Number of Items per Cluster</h3>
+    <pre>{{ clustering_algorithm_data.cluster_sizes }}</pre>
+
+    <h3>Cluster Samples</h3>
+    {% for cluster_label, base64_image in clustering_algorithm_data.cluster_base64_images.items() %}
+        <h4>Cluster {{ cluster_label }}</h4>
+        <img src="data:image/png;base64,{{ base64_image }}" alt="Cluster {{ cluster_label }} Sample Data">
+    {% endfor %}
+{% endfor %}
+</body>
+</html>

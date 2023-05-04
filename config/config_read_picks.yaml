@@ -1,0 +1,33 @@
+global_params:
+  length: 100
+  seed: 42
+  test_size: 0.2
+
+time_series:
+  - type: from_csv
+    file_path: 'data/pick-entry-data.csv'
+    column_name: 'value'
+
+preprocessors:
+  - name: normalize
+    module: preprocessors.normalize
+    function: normalize
+
+clustering_algorithms:
+  - name: k_means
+    module: clustering_algorithms.k_means
+    function: k_means_clustering
+    params:
+      n_clusters: 3
+
+  - name: dbscan
+    module: clustering_algorithms.dbscan
+    function: dbscan_clustering
+    params:
+      eps: 1.0
+      min_samples: 2
+
+metrics:
+  - name: silhouette_score
+  - name: adjusted_rand_score
+  - name: calinski_harabasz_score
