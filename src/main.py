@@ -15,9 +15,11 @@ def apply_preprocessors(time_series: np.ndarray, config) -> np.ndarray:
     # Load the preprocessors 
     preprocessed_time_series = time_series.copy()
 
-    for preprocessor_config in config['preprocessors']:
-        print(f"Applying {preprocessor_config['name']} preprocessor...")        
-        preprocessed_time_series = apply_preprocessor(preprocessor_config, preprocessed_time_series)
+    # check if there are any preprocessors
+    if 'preprocessors' in config:
+        for preprocessor_config in config['preprocessors']:
+            print(f"Applying {preprocessor_config['name']} preprocessor...")        
+            preprocessed_time_series = apply_preprocessor(preprocessor_config, preprocessed_time_series)
 
     return preprocessed_time_series
 
@@ -32,17 +34,20 @@ def generate_time_series_dict(global_params, config)->Dict[int, np.ndarray]:
         num_instances = time_series_config.get('num_instances', 1)
         generated_time_series_array = np.empty((num_instances, length), dtype=float)
 
+        series_list = []
         for series_idx in range(num_instances):
-            time_series = generate_time_series(global_params, time_series_config)
-            generated_time_series_array[series_idx, :] = time_series.ravel()
+            series_list.append(generate_time_series(global_params, time_series_config))
+            # time_series = generate_time_series(global_params, time_series_config)
+            # generated_time_series_array[series_idx, :] = time_series
+        generated_time_series_array = np.vstack(series_list)
             
         generated_time_series[time_series_index] = generated_time_series_array
     return generated_time_series
 
 def generate_pca_plot(X_data, cluster_labels = None):
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=5)
     X_train_pca = pca.fit_transform(X_data)
-    return generate_pca_plot_image(X_train_pca, cluster_labels)
+    return generate_pca_plot_image(X_train_pca, cluster_labels, pca_model=pca)
     
 
 
@@ -66,7 +71,7 @@ def stack_generated_time_series(generated_time_series) -> Tuple[np.ndarray, np.n
 
 
 if __name__ == '__main__':
-    config_file = 'config/config_example.yaml'
+    config_file = 'config/config_read_picks.yaml'
     config = load_config(config_file)
     global_params = config.get('global_params', {})
 

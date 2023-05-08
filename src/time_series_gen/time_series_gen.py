@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from time_series_gen.base import SineWaveGenerator, ConstantGenerator
+from time_series_gen.base import SineWaveGenerator, ConstantGenerator, CSVGenerator
 from time_series_gen.transformations import ConstantOffsetTransformation, NonLinearTransformation
 from time_series_gen.disturbances import NoiseDisturbance, SignalLossDisturbance
 
@@ -21,13 +21,13 @@ disturbance_registry = Registry()
 
 base_generator_registry.register('sine_wave', SineWaveGenerator)
 base_generator_registry.register('constant', ConstantGenerator)
+base_generator_registry.register('from_csv', CSVGenerator)
 
 transformation_registry.register('constant_offset', ConstantOffsetTransformation)
 transformation_registry.register('nonlinear', NonLinearTransformation)
 
 disturbance_registry.register('noise', NoiseDisturbance)
 disturbance_registry.register('signal_loss', SignalLossDisturbance)
-
 
 
 def generate_time_series(global_params, config):
@@ -56,4 +56,4 @@ def generate_time_series(global_params, config):
             disturbance = disturbance_cls(**disturbance_config.get('params', {}))
             base_series = disturbance.apply(base_series)
 
-    return base_series.reshape(-1, 1)
+    return base_series

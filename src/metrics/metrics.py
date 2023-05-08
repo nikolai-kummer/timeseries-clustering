@@ -13,6 +13,9 @@ class Registry:
         return self._registry.get(name)
 
 def silhouette_score_wrapper(X_train, y_train, cluster_assignments_train):
+    # chech if cluster_assignments_train is all one value
+    if len(set(cluster_assignments_train)) == 1:
+        return math.nan
     return silhouette_score(X_train, cluster_assignments_train)
 
 def adjusted_rand_score_wrapper(X_train, y_train, cluster_assignments_train):
@@ -21,6 +24,8 @@ def adjusted_rand_score_wrapper(X_train, y_train, cluster_assignments_train):
     return adjusted_rand_score(y_train, cluster_assignments_train)
 
 def calinski_harabasz_score_wrapper(X_train, y_train, cluster_assignments_train):
+    if len(set(cluster_assignments_train)) == 1:
+        return math.nan
     return calinski_harabasz_score(X_train, cluster_assignments_train)
 
 

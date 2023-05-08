@@ -48,21 +48,38 @@ def generate_cluster_sample_plots_base64(cluster_assignments, X_train, n_panels:
             axes[i].set_axis_off()
 
         # Set common title, xlabel, and ylabel for all subplots
-        fig.suptitle(f"Cluster {cluster_label} Sample Data", fontsize=16)
+        n_cluster_samples = sum(cluster_assignments == cluster_label)
+        fig.suptitle(f"Cluster {cluster_label} Sample Data, n = {n_cluster_samples}", fontsize=16)
         axes[0].set_ylabel("Value", fontsize=14)
 
         base64_images[cluster_label] = fig_to_base64(fig)
 
     return base64_images
 
-def generate_pca_plot_image(X_data, cluster_cols) -> plt.figure:
-    # Plot the 2D representation of the clustered data
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.scatter(X_data[:, 0], X_data[:, 1], c=cluster_cols)
-    ax.set_title("PCA Clustering")
-    ax.set_xlabel("PCA Component 1")
-    ax.set_ylabel("PCA Component 2")
+def generate_pca_plot_image(X_data, cluster_cols, pca_model) -> plt.figure:
+    # Plot the 2D representation of the clustered data and the explained variance ratio
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+
+    # Subplot for PCA clustering
+    scatter = ax1.scatter(X_data[:, 0], X_data[:, 1], c=cluster_cols)
+    ax1.set_title("PCA Clustering")
+    ax1.set_xlabel("PCA Component 1")
+    ax1.set_ylabel("PCA Component 2")
+    cbar = plt.colorbar(scatter, ax=ax1)
+    cbar.set_label("Cluster")
+
+    # Subplot for explained variance ratio
+    explained_variance_ratio = pca_model.explained_variance_ratio_
+    n_components = np.arange(1, len(explained_variance_ratio) + 1)
+    ax2.bar(n_components, explained_variance_ratio)
+    ax2.set_title("Explained Variance Ratio")
+    ax2.set_xlabel("PCA Components")
+    ax2.set_ylabel("Explained Variance Ratio")
+    ax2.set_xticks(n_components)
+
+    # Adjust the layout
+    plt.tight_layout()
+
     return fig_to_base64(fig)
     
 

@@ -1,7 +1,8 @@
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 def normalize(dataset):
-    scaler = MinMaxScaler()
-    preprocessed_data = scaler.fit_transform(dataset)
+    min_value = np.min(dataset)
+    max_value = np.max(dataset)
+
+    preprocessed_data = (dataset - min_value) / (max_value - min_value)
     return preprocessed_data
