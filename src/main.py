@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from typing import Dict, Tuple
 
-from report_helper import render_html_report, generate_cluster_sample_plots_base64, generate_pca_plot_image, generate_initial_sample_plots_base64
+from report_helper import render_html_report, generate_cluster_sample_plots_base64, generate_pca_plot_image, generate_initial_sample_plots_base64, generate_tsne_plot_image
 from config_parser import load_config, apply_preprocessor, apply_clustering_algorithm
 from metrics.metrics import metrics_registry
 from time_series_gen.time_series_gen import generate_time_series
@@ -51,13 +51,25 @@ def generate_pca_plot(X_data, cluster_labels = None):
     
 
 
+# def split_train_test(X_data: np.ndarray, y_data: np.ndarray, global_params):
+#     # Split the data into train and test sets
+#     test_size = global_params.get('test_size', 0.2)
+#     seed = global_params.get('seed', 42)
+#     X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=test_size, random_state=seed)
+
+#     return X_train, X_test, y_train, y_test
+
 def split_train_test(X_data, y_data, global_params):
+    # Create an array of indices
+    indices = np.arange(X_data.shape[0])
+
     # Split the data into train and test sets
     test_size = global_params.get('test_size', 0.2)
     seed = global_params.get('seed', 42)
-    X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=test_size, random_state=seed)
+    indices_train, indices_test, X_train, X_test, y_train, y_test = train_test_split(
+        indices, X_data, y_data, test_size=test_size, random_state=seed)
 
-    return X_train, X_test, y_train, y_test
+    return X_train, X_test, y_train, y_test, indices_train, indices_test
 
 
 def stack_generated_time_series(generated_time_series) -> Tuple[np.ndarray, np.ndarray]:
@@ -78,15 +90,16 @@ if __name__ == '__main__':
     generated_time_series = generate_time_series_dict(global_params, config)
     x_data, y_data = stack_generated_time_series(generated_time_series)
     x_data_preprocessed = apply_preprocessors(x_data, config)
-    X_train, X_test, y_train, y_test = split_train_test(x_data_preprocessed, y_data, global_params)
+    X_train, X_test, y_train, y_test, indices_train, indices_test = split_train_test(x_data_preprocessed, y_data, global_params)
+    x_data_original_train = x_data[indices_train]
 
     # Load the clustering algorithms from the configuration
     clustering_algorithms = config['clustering_algorithms']
 
     # Define initial plotting data
     initial_samples_data = {
-        'total_samples': len(X_train),
-        'initial_sample_plots': generate_initial_sample_plots_base64(X_train)
+        'total_samples': len(x_data_original_train),
+        'initial_sample_plots': generate_initial_sample_plots_base64(x_data_original_train)
     }
 
     # Perform clustering on the train data
@@ -112,14 +125,15 @@ if __name__ == '__main__':
 
         # Collect data for the current clustering algorithm
         cluster_sizes = np.bincount(cluster_assignments_train+1)
-        cluster_base64_images = generate_cluster_sample_plots_base64(cluster_assignments_train, X_train)
+        cluster_base64_images = generate_cluster_sample_plots_base64(cluster_assignments_train, x_data_original_train)
 
         clustering_algorithms_data.append({
             'name': algorithm_name,
             'cluster_assignments': cluster_assignments_train,
             'cluster_sizes': cluster_sizes,
             'cluster_base64_images': cluster_base64_images,
-            'pca_base64_image': generate_pca_plot(X_train, cluster_assignments_train)
+            'pca_base64_image': generate_pca_plot(X_train, cluster_assignments_train),
+            'tsne_base64_image': generate_tsne_plot_image(X_train, cluster_assignments_train)
         })
 
         # Render the HTML report

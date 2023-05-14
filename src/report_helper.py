@@ -5,7 +5,7 @@ import os
 
 from io import BytesIO
 from jinja2 import Environment, FileSystemLoader
-
+from sklearn.manifold import TSNE
 
 def fig_to_base64(fig: plt.figure, close_fig: bool=True):
     buffer = BytesIO()
@@ -81,7 +81,24 @@ def generate_pca_plot_image(X_data, cluster_cols, pca_model) -> plt.figure:
     plt.tight_layout()
 
     return fig_to_base64(fig)
-    
+
+def generate_tsne_plot_image(X_data, cluster_labels=None, perplexity=30) -> plt.figure:
+    # Perform t-SNE on the normalized data
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=42)
+    data_tsne = tsne.fit_transform(X_data)
+
+    # Plot the t-SNE results
+    fig, ax = plt.subplots(figsize=(8, 8))
+    scatter = ax.scatter(data_tsne[:, 0], data_tsne[:, 1], c=cluster_labels)
+    ax.set_title("t-SNE Clustering")
+    ax.set_xlabel("t-SNE Component 1")
+    ax.set_ylabel("t-SNE Component 2")
+
+    # Add a colorbar
+    cbar = plt.colorbar(scatter, ax=ax)
+    cbar.set_label("Cluster")
+
+    return fig_to_base64(fig)
 
 def render_html_report(initial_sample_data, clustering_algorithms, output_file):
     env = Environment(loader=FileSystemLoader('.'))

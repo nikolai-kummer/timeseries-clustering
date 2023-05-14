@@ -15,8 +15,9 @@ def load_config(file_path):
 def apply_preprocessor(preprocessor_config, dataset):
     module = preprocessor_config['module']
     function = preprocessor_config['function']
+    params = preprocessor_config.get('params', {})
     preprocessor_function = import_function(module, function)
-    return preprocessor_function(dataset)
+    return preprocessor_function(dataset, **params)
 
 def apply_clustering_algorithm(clustering_algorithm_config, dataset):
     module = clustering_algorithm_config['module']

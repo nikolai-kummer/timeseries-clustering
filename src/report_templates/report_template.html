@@ -22,6 +22,10 @@
 
     <h3>{{ clustering_algorithm_data.name }} PCA Plot</h3>
     <img src="data:image/png;base64,{{ clustering_algorithm_data.pca_base64_image }}" alt="{{ clustering_algorithm_data.name }} PCA Plot">
+    
+    <h3>t-SNE Clustering</h3>
+    <img src="data:image/png;base64,{{ clustering_algorithm_data.tsne_base64_image }}" alt="t-SNE Clustering" style="width: 100%; max-width: 800px;">
+    
     <h3>Cluster Assignments</h3>
     <pre>{{ clustering_algorithm_data.cluster_assignments }}</pre>
 
